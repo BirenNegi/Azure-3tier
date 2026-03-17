@@ -1,0 +1,97 @@
+# ============================================================================
+# TERRAFORM VARIABLES EXAMPLE - terraform.tfvars.example
+# ============================================================================
+# Copy this file to terraform.tfvars and customize values for your environment
+# DO NOT commit terraform.tfvars to version control (add to .gitignore)
+# 
+# Usage:
+#   cp terraform.tfvars.example terraform.tfvars
+#   terraform plan
+#
+
+# ============================================================================
+# RESOURCE GROUP & LOCATION
+# ============================================================================
+resource_group_name = "rg-3tier-prod"
+location            = "East US"  # Change to desired Azure region
+environment         = "production"
+
+# ============================================================================
+# NETWORKING
+# ============================================================================
+vnet_name            = "prod-3tier-vnet"
+vnet_address_space   = ["10.0.0.0/16"]
+
+web_subnet_name = "prod-web-subnet"
+web_subnet_prefix = ["10.0.1.0/24"]
+
+app_subnet_name = "prod-app-subnet"
+app_subnet_prefix = ["10.0.2.0/24"]
+
+db_subnet_name = "prod-db-subnet"
+db_subnet_prefix = ["10.0.3.0/24"]
+
+# ============================================================================
+# NETWORK SECURITY
+# ============================================================================
+web_nsg_name        = "prod-web-nsg"
+app_port            = 5000
+rdp_port            = 3389
+app_priority        = 1001
+rdp_priority        = 1002
+allowed_source_ip   = "*"  # ⚠️ For production, restrict to specific IP/CIDR
+
+# ============================================================================
+# VIRTUAL MACHINE
+# ============================================================================
+web_vm_name         = "prod-webvm-001"
+web_pip_name        = "prod-web-pip"
+web_nic_name        = "prod-web-nic"
+vm_size             = "Standard_D2as_v4"  # Options: Standard_B2s, Standard_D2s_v3, Standard_D4s_v3, etc.
+
+# SECURITY: Use environment variables or AWS Secrets Manager for passwords
+# Option 1: Set via environment variables
+#   export TF_VAR_admin_password="YourSecurePassword123!"
+#   export TF_VAR_sql_admin_password="YourSecurePassword123!"
+#
+# Option 2: Use -var flag
+#   terraform apply -var="admin_password=YourSecurePassword123!"
+#
+# Option 3: Uncomment below (NOT RECOMMENDED for sensitive data)
+# admin_username = "azureuser"
+# admin_password = "YourComplexPassword123!"
+
+admin_username      = "azureuser"
+
+os_disk_name        = "prod-webvm-osdisk"
+os_disk_caching     = "ReadWrite"
+storage_account_type = "Premium_LRS"  # Options: Standard_LRS, Premium_LRS
+
+# VM Image - Windows Server 2019
+image_publisher     = "MicrosoftWindowsServer"
+image_offer         = "WindowsServer"
+image_sku           = "2019-Datacenter"  # Options: 2016-Datacenter, 2019-Datacenter, 2022-Datacenter
+image_version       = "latest"
+
+private_ip_allocation = "Dynamic"  # Options: Dynamic, Static
+public_ip_allocation  = "Static"
+
+# ============================================================================
+# SQL SERVER
+# ============================================================================
+sql_server_name     = "prod-3tier-sqlserver"
+# sql_admin_login   = "sqladmin"     # Keep secure, use env var
+# sql_admin_password = "SecurePass123!"  # Use environment variable!
+sql_version         = "12.0"  # SQL Server 2017
+
+# ============================================================================
+# TAGS
+# ============================================================================
+common_tags = {
+  Environment = "production"
+  CreatedBy   = "Terraform"
+  Project     = "3Tier-App"
+  Owner       = "DevOps-Team"
+  CostCenter  = "Engineering"
+  ManagedBy   = "IaC"
+}

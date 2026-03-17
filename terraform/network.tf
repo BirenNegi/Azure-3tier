@@ -1,62 +1,66 @@
 resource "azurerm_virtual_network" "vnet" {
-  name                = "3tier-vnet"
-  location            = "Central India"
+  name                = var.vnet_name
+  location            = var.location
   resource_group_name = azurerm_resource_group.rg.name
-  address_space       = ["10.0.0.0/16"]
+  address_space       = var.vnet_address_space
+
+  tags = var.common_tags
 }
 
 resource "azurerm_subnet" "web" {
-  name                 = "web-subnet"
+  name                 = var.web_subnet_name
   resource_group_name  = azurerm_resource_group.rg.name
   virtual_network_name = azurerm_virtual_network.vnet.name
-  address_prefixes     = ["10.0.1.0/24"]
+  address_prefixes     = var.web_subnet_prefix
 }
 
 resource "azurerm_subnet" "app" {
-  name                 = "app-subnet"
+  name                 = var.app_subnet_name
   resource_group_name  = azurerm_resource_group.rg.name
   virtual_network_name = azurerm_virtual_network.vnet.name
-  address_prefixes     = ["10.0.2.0/24"]
+  address_prefixes     = var.app_subnet_prefix
 }
 
 resource "azurerm_subnet" "db" {
-  name                 = "db-subnet"
+  name                 = var.db_subnet_name
   resource_group_name  = azurerm_resource_group.rg.name
   virtual_network_name = azurerm_virtual_network.vnet.name
-  address_prefixes     = ["10.0.3.0/24"]
+  address_prefixes     = var.db_subnet_prefix
 }
 
- resource  "azurerm_network_security_group" "web_nsg" {
-  name                 = "web-nsg"
-  location             = "Central India"
-  resource_group_name  = azurerm_resource_group.rg.name
+ resource "azurerm_network_security_group" "web_nsg" {
+  name                = var.web_nsg_name
+  location            = var.location
+  resource_group_name = azurerm_resource_group.rg.name
 
   security_rule {
-    name                       = "AllowHTTP"
-    priority                   = 1001
+    name                       = "AllowApp"
+    priority                   = var.app_priority
     direction                  = "Inbound"
     access                     = "Allow"
     protocol                   = "Tcp"
     source_port_range          = "*"
-    destination_port_range     = "5000"
-    source_address_prefix      = "*"
+    destination_port_range     = tostring(var.app_port)
+    source_address_prefix      = var.allowed_source_ip
     destination_address_prefix = "*"
   }
 
   security_rule {
     name                       = "allow-rdp"
-    priority                   = 1002
+    priority                   = var.rdp_priority
     direction                  = "Inbound"
     access                     = "Allow"
     protocol                   = "Tcp"
     source_port_range          = "*"
-    destination_port_range     = "3389"
-    source_address_prefix      = "*"
-    destination_address_prefix = "*"  
-  } 
+    destination_port_range     = tostring(var.rdp_port)
+    source_address_prefix      = var.allowed_source_ip
+    destination_address_prefix = "*"
   }
 
-  resource "azurerm_subnet_network_security_group_association" "web_nsg_assoc" {
+  tags = var.common_tags
+}
+
+resource "azurerm_subnet_network_security_group_association" "web_nsg_assoc" {
   subnet_id                 = azurerm_subnet.web.id
   network_security_group_id = azurerm_network_security_group.web_nsg.id
 }

@@ -1,4 +1,6 @@
 resource "azurerm_resource_group" "rg" {
-  name     = "rg-3tier-demo"
-  location = "Central India"
+  name     = var.resource_group_name
+  location = var.location
+
+  tags = var.common_tags
 }
