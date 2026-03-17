@@ -25,7 +25,7 @@ resource "azurerm_windows_virtual_machine" "web_vm" {
   name                = "webvm"
   location            = "Central India"
   resource_group_name = azurerm_resource_group.rg.name
-  size                = "Standard_B2s"
+  size                = "Standard_D2s_v3"
 
   admin_username = "azureuser"
   admin_password = "Password1234!" # ⚠️ Must meet Azure complexity
